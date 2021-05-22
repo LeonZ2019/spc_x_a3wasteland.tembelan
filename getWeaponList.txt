@@ -1,0 +1,78 @@
+TYPE_WEAPON_PRIMARY = 1; 
+TYPE_WEAPON_HANDGUN = 2; 
+TYPE_WEAPON_SECONDARY = 4; 
+TYPE_MAGAZINE_HANDGUN_AND_GL = 16; 
+TYPE_MAGAZINE_PRIMARY_AND_THROW = 256; 
+TYPE_MAGAZINE_SECONDARY_AND_PUT = 512; 
+TYPE_MAGAZINE_MISSILE = 768; 
+TYPE_BINOCULAR_AND_NVG = 4096; 
+TYPE_WEAPON_VEHICLE = 65536; 
+TYPE_ITEM = 131072; 
+TYPE_DEFAULT = 0; 
+TYPE_MUZZLE = 101; 
+TYPE_OPTICS = 201; 
+TYPE_FLASHLIGHT = 301; 
+TYPE_BIPOD = 302; 
+TYPE_FIRST_AID_KIT = 401; 
+TYPE_FINS = 501; 
+TYPE_BREATHING_BOMB = 601; 
+TYPE_NVG = 602; 
+TYPE_GOGGLE = 603; 
+TYPE_SCUBA = 604; 
+TYPE_HEADGEAR = 605; 
+TYPE_FACTOR = 607; 
+TYPE_RADIO = 611; 
+TYPE_HMD = 616; 
+TYPE_BINOCULAR = 617; 
+TYPE_MEDIKIT = 619; 
+TYPE_TOOLKIT = 620; 
+TYPE_UAV_TERMINAL = 621; 
+TYPE_VEST = 701; 
+TYPE_UNIFORM = 801; 
+TYPE_BACKPACK = 901; 
+private _cargo = [ [[],[],[]], [[],[],[],[]], [],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]; 
+private _configCfgWeapons = configFile >> "CfgWeapons"; 
+{  
+    private _configItemInfo = _x >> "ItemInfo"; 
+    private _simulationType = getText (_x >> "simulation"); 
+    private _className = configName _x; 
+    private _hasItemInfo = isClass (_configItemInfo); 
+    private _itemInfoType = if (_hasItemInfo) then {getNumber (_configItemInfo >> "type")} else {0}; 
+    private _weaponName = [configFile >> "CfgWeapons" >> _className] call BIS_fnc_displayName; 
+    private _magazineName = [configFile >> "CfgMagazines" >> _className] call BIS_fnc_displayName; 
+    private _mag = _className + "=" + _magazineName; 
+    switch true do { 
+        case (_itemInfoType in [TYPE_MUZZLE, TYPE_OPTICS, TYPE_FLASHLIGHT, TYPE_BIPOD]): { 
+            (_cargo select 1) select ([TYPE_OPTICS,TYPE_FLASHLIGHT,TYPE_MUZZLE,TYPE_BIPOD] find _itemInfoType) pushBackUnique _weaponName; 
+        }; 
+        case (isClass (_x >> "WeaponSlotsInfo") &&  
+            {getNumber (_x >> 'type') != TYPE_BINOCULAR_AND_NVG}): {  
+            switch (getNumber (_x >> "type")) do {  
+                case TYPE_WEAPON_PRIMARY: {  
+                    (_cargo select 0) select 0 pushBackUnique (_className call bis_fnc_baseWeapon) + "=" + _weaponName; 
+                }; 
+                case TYPE_WEAPON_HANDGUN: {  
+                    (_cargo select 0) select 2 pushBackUnique (_className call bis_fnc_baseWeapon) + "=" + _weaponName; 
+                }; 
+                case TYPE_WEAPON_SECONDARY: {  
+                    (_cargo select 0) select 1 pushBackUnique (_className call bis_fnc_baseWeapon) + "=" + _weaponName; 
+                }; 
+            }; 
+        }; 
+    }; 
+} foreach configProperties [_configCfgWeapons, "isClass _x && {(if (isNumber (_x >> 'scopeArsenal')) then {getNumber (_x >> 'scopeArsenal')} else {getNumber (_x >> 'scope')}) == 2} && {getNumber (_x >> 'ace_arsenal_hide') != 1}", true]; 
+{  
+    private _className = configName _x; 
+  
+    switch true do {   
+        case (  
+                ((getNumber (_x >> "type") in [TYPE_MAGAZINE_PRIMARY_AND_THROW,TYPE_MAGAZINE_SECONDARY_AND_PUT,1536,TYPE_MAGAZINE_HANDGUN_AND_GL,TYPE_MAGAZINE_MISSILE]) ||  
+                {(getNumber (_x >> hide)) == -1}) &&  
+                {!(_className in _grenadeList)} &&  
+                {!(_className in _putList)}  
+            ): {  
+            (_cargo select 2) pushBackUnique _mag; 
+        }; 
+    }; 
+} foreach configProperties [(configFile >> "CfgMagazines"), "isClass _x && {(if (isNumber (_x >> 'scopeArsenal')) then {getNumber (_x >> 'scopeArsenal')} else {getNumber (_x >> 'scope')}) == 2}", true]; 
+_cargo;

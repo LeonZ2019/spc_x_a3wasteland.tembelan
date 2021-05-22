@@ -1,0 +1,141 @@
+respawn="BASE";
+respawnDelay=7;
+disabledAI=1;
+disableChannels[] = {{0,false,true}, {2,true,true}, {6,false,true}}; // 0 = global, 1 = side, 2 = command // new syntax: {{channel<number>, disableText<bool>, disableVoice<bool>}, ...};
+// side voice is disabled for indies in client\preInit.sqf
+joinUnassigned = 0;
+enableItemsDropping = 0;
+forceRotorLibSimulation = 0; // if you set this to 1, you deny freedom of choice to the players, which is the very principle this mission is built upon
+weaponPool = 0;
+unsafeCVL = 1; // required for store selling bins and private storage
+corpseManagerMode = 1;
+corpseRemovalMinTime = 15*60;
+corpseRemovalMaxTime = 25*60;
+wreckManagerMode = 1;
+wreckRemovalMinTime = 5*60;
+wreckRemovalMaxTime = 10*60;
+enableDebugConsole = 1;
+respawnDialog = 0; // do not enable this, otherwise the default scoreboard will overlap with the new one
+onPauseScript = "client\clientEvents\onPause.sqf";
+class Header
+{
+	gameType=Sandbox;
+	minPlayers=1;
+	maxPlayers=62; // 144 players, 2 headless clients
+};
+
+author="Southwest Pacific Command & A3Wasteland.com"; // it would be great if you could keep "A3Wasteland.com" in the name, like "YourName and A3Wasteland.com" :)
+onLoadName = "Tembelan Island A3Wasteland"; // it would be great if you could keep "A3" in the name, like "ABC A3Wasteland" instead of "ABC Wasteland" :)
+onLoadMission = "Wasteland is a harsh survival sandbox where two teams and independent players fight for survival.";
+overviewText = "Wasteland is a harsh survival sandbox where two teams and independent players fight for survival.";
+overviewTextLocked = "Wasteland is a harsh survival sandbox where two teams and independent players fight for survival.";
+overviewPicture = "mapConfig\loadScreen.jpg";
+loadScreen = "mapConfig\loadScreen.jpg";
+briefing = 0; // if 0, skip Continue button
+
+#include "debugFlag.hpp"
+
+// A3W UI color (default = sky blue)
+// light green now
+#define A3W_UICOLOR_R  0.48 // default = 0.25
+#define A3W_UICOLOR_G  0.90 // default = 0.51
+#define A3W_UICOLOR_B  0.50 // default = 0.96
+
+//Dialog includes
+
+#include "client\gui_base.hpp"
+#include "addons\R3F_ARTY_AND_LOG\desc_include.h"
+#include "client\systems\ui_toolkit.hpp"
+#include "client\systems\common.hpp"
+#include "client\items\warchest\dialog.hpp"
+#include "client\items\atm\atm_gui.hpp"
+#include "client\items\artillery\artillery_gui.hpp"
+#include "client\actions\gui.hpp"
+#include "addons\far_revive\reviveBlank_gui.hpp"
+#include "client\systems\playerMenu\dialog\player_settings.hpp"
+#include "client\systems\groups\dialog\groupManagement.hpp"
+#include "client\systems\gunStore\dialog\gunshop_settings.hpp"
+#include "client\systems\generalStore\dialog\genstore_settings.hpp"
+#include "client\systems\vehicleStore\dialog\vehiclestore_settings.hpp"
+#include "client\systems\vehicleStore\dialog\vehpaint_gui.hpp"
+#include "client\systems\adminPanel\dialog\adminMenu.hpp"
+#include "client\systems\adminPanel\dialog\modMenu.hpp"
+#include "client\systems\adminPanel\dialog\serverAdminMenu.hpp"
+#include "client\systems\adminPanel\dialog\debugMenu.hpp"
+#include "client\systems\adminPanel\dialog\playerMenu.hpp"
+#include "client\systems\adminPanel\dialog\vehicleManagement.hpp"
+#include "client\systems\adminPanel\dialog\markerLog.hpp"
+#include "client\systems\adminPanel\dialog\objectSearch.hpp"
+#include "client\systems\playerMenu\dialog\respawn_dialog.hpp"
+#include "client\systems\playerMenu\dialog\teamkill_dialog.hpp"
+#include "client\systems\killFeed\killFeedMenu_gui.hpp"
+#include "addons\proving_ground\PG_config.hpp"
+#include "addons\outlw_magrepack\config.hpp"
+#include "addons\gui\gui.hpp"
+#include "addons\parking\list_simple_menu.hpp"
+#include "addons\CHVD\dialog.hpp"
+
+class RscTitles
+{
+	#include "addons\proving_ground\PG_rsctitles.hpp"
+	#include "addons\lsd_nvg\RscTitles.hpp"
+	#include "client\systems\hud\dialog\hud.hpp"
+	#include "client\systems\playerMenu\dialog\welcome.hpp"
+	#include "client\systems\scoreboard\score_gui.hpp"
+	#include "client\systems\killFeed\killFeed_gui.hpp"
+	#include "addons\far_revive\revive_gui.hpp"
+};
+
+class CfgDebriefing
+{
+	class ErrorSteamID
+	{
+		title = "Error";
+		subtitle = "";
+		description = "The server is unable to find your Steam ID due to an Arma engine network bug. Please rejoin the server.<br/>If the problem persists after rejoining, please restart the game.";
+	};
+};
+
+class CfgFunctions
+{
+	class A3W
+	{
+		#include "client\CfgFunctions.hpp"
+		#include "server\CfgFunctions.hpp"
+	};
+
+	#include "addons\CHVD\CfgFunctions.hpp"
+};
+
+class CfgNotifications
+{
+	#include "client\CfgNotifications.hpp"
+};
+
+class CfgSounds
+{
+	sounds[] = {};
+	#include "client\CfgSounds.hpp"
+};
+
+class CfgRemoteExec // applies only to clients
+{
+	class Functions
+	{
+		#ifndef A3W_DEBUG
+		mode = 1; // 0 = block all, 1 = whitelist, 2 = allow all
+		#else
+		mode = 2; // debug mode, don't touch
+		#endif
+
+		#include "client\CfgRemoteExec_fnc.hpp"
+	};
+	class Commands
+	{
+		#ifndef A3W_DEBUG
+		mode = 1; // 0 = block all, 1 = whitelist, 2 = allow all
+		#else
+		mode = 2; // debug mode, don't touch
+		#endif
+	};
+};
